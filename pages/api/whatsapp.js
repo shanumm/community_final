@@ -1,20 +1,32 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 
-let client;
+if (!global.client) {
+  global.client = new Client({
+    authStrategy: new LocalAuth({
+      dataPath: "whatsapp_auth_testing",
+    }),
+  });
 
-const initializeClient = () => {
-  if (!client) {
-    client = new Client({
-      authStrategy: new LocalAuth({
-        dataPath: "./pages/api/whatsapp_auth_test",
-      }),
-    });
-    client.initialize();
-  }
-};
+  global.client.initialize();
+
+  global.client.on("ready", () => {
+    console.log("Client is ready!");
+  });
+
+  global.client.on("auth_failure", (msg) => {
+    console.error("Authentication failed!", msg);
+    global.client = null; // Reset client on auth failure
+  });
+
+  global.client.on("disconnected", (reason) => {
+    console.log("Client disconnected!", reason);
+    global.client = null; // Reset client on disconnect
+  });
+}
+
+const client = global.client; // Use the persistent client
 
 const get_qr = () => {
-  initializeClient();
   return new Promise((resolve, reject) => {
     if (!client.info?.wid) {
       client.once("qr", (qr) => {
@@ -22,17 +34,15 @@ const get_qr = () => {
         resolve(qr);
       });
     } else {
-      resolve(null);
+      console.log(client.info, "Client is already connected");
+      resolve(null); // Already connected
     }
   });
 };
 
 const check_client_auth = () => {
-  initializeClient();
-
   return new Promise((resolve, reject) => {
     if (client.info?.wid) {
-      // Client is already connected
       console.log("Client is already connected!");
       resolve(true);
     } else {
@@ -40,17 +50,16 @@ const check_client_auth = () => {
         console.log("Client is ready!");
         resolve(true);
       });
-    }
 
-    client.on("auth_failure", () => {
-      console.log("Authentication failed!");
-      reject(new Error("Authentication failed"));
-    });
+      client.on("auth_failure", () => {
+        console.log("Authentication failed!");
+        reject(new Error("Authentication failed"));
+      });
+    }
   });
 };
 
 const get_groups_data = () => {
-  initializeClient();
   return new Promise((resolve, reject) => {
     client
       .getChats()
@@ -67,28 +76,20 @@ const get_groups_data = () => {
 export default async function handler(req, res) {
   const { param } = req.query;
 
-  if (param === "get_qr") {
-    try {
+  try {
+    if (param === "get_qr") {
       const qrValue = await get_qr();
       res.status(200).json({ message: "success", value: qrValue });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "An error occurred", error: err.message });
-    }
-  } else if (param === "connect_whatsapp") {
-    try {
+    } else if (param === "connect_whatsapp") {
       const client_connected = await check_client_auth();
       res.status(200).json({ message: "success", value: client_connected });
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "An error occurred", error: err.message });
+    } else if (param === "get_groups") {
+      const get_groups = await get_groups_data();
+      res.status(200).json({ message: "success", value: get_groups });
+    } else {
+      res.status(400).json({ message: "Invalid parameter" });
     }
-  } else if (param == "get_groups") {
-    const get_groups = await get_groups_data();
-    res.status(200).json({ message: "success", value: get_groups });
-  } else {
-    res.status(400).json({ message: "Invalid parameter" });
+  } catch (err) {
+    res.status(500).json({ message: "An error occurred", error: err.message });
   }
 }
