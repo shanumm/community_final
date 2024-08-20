@@ -45,3 +45,22 @@ export const get_whatsapp_groups = async () => {
     return err;
   }
 };
+export const add_whatsapp_participants_in_group = async (
+  number = [],
+  group
+) => {
+  try {
+    const response = await fetch(
+      `/api/whatsapp?param=add_participant&number=${number}&group=${group}`
+    );
+    const data = await response.json();
+    if (data.message == "success") {
+      return data;
+    } else {
+      throw new Error("Something went wrong");
+    }
+  } catch (err) {
+    console.error(err);
+    return err;
+  }
+};

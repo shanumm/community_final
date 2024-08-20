@@ -73,6 +73,37 @@ const get_groups_data = () => {
   });
 };
 
+const add_participants = (participants = [], group_name) => {
+  return new Promise((resolve, reject) => {
+    client
+      .getChats()
+      .then((chats) => {
+        console.log(participants, group_name);
+        const groupChat = chats.find(
+          (chat) => chat.isGroup && chat.name === group_name
+        );
+        console.log(groupChat, ">>>>>>>>");
+        if (groupChat) {
+          groupChat
+            .addParticipants(participants)
+            .then((u) => {
+              resolve("Participants added successfully!");
+            })
+            .catch((err) => {
+              reject("Failed to add participants:", err);
+            });
+        } else {
+          reject("Group not found!");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+
+        reject("Failed to retrieve chats:", err);
+      });
+  });
+};
+
 export default async function handler(req, res) {
   const { param } = req.query;
 
@@ -86,6 +117,10 @@ export default async function handler(req, res) {
     } else if (param === "get_groups") {
       const get_groups = await get_groups_data();
       res.status(200).json({ message: "success", value: get_groups });
+    } else if (param === "add_participant") {
+      const { group, number } = req.query;
+      const add_participant = await add_participants(number, group);
+      res.status(200).json({ message: "success", value: add_participant });
     } else {
       res.status(400).json({ message: "Invalid parameter" });
     }

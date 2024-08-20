@@ -2,11 +2,27 @@
 import { useContext, useEffect, useState } from "react";
 import QR_modal from "../_components/QR_modal";
 import { MyContext } from "@/context/context";
+import { add_whatsapp_participants_in_group } from "@/utils/utils";
 
 export default function Whatsapp() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const { group_state, selected_groups, manage_selected_groups } =
     useContext(MyContext);
   const [dropdown, setdropdown] = useState(false);
+
+  const handleAddParticipant = async () => {
+    const add_person = await add_whatsapp_participants_in_group(
+      [phoneNumber + "@c.us"],
+      "Mummy"
+    );
+    console.log(add_person);
+  };
+
+  useEffect(() => {
+    console.log(searchTerm);
+  }, [searchTerm]);
+
   return (
     <div>
       <h1>WhatsApp Initialization</h1>
@@ -45,25 +61,35 @@ export default function Whatsapp() {
               dropdown ? "" : "hidden"
             } bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 max-h-48 overflow-y-auto`}
           >
+            <input
+              type="search"
+              id="search"
+              class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Search"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
             <ul
               className="py-2 text-sm text-gray-700 dark:text-gray-200"
               aria-labelledby="dropdownHoverButton"
             >
-              {group_state.map((group, index) => (
-                <li key={index}>
-                  <a
-                    onClick={() =>
-                      manage_selected_groups(
-                        { name: group.name, id: group.id },
-                        "add"
-                      )
-                    }
-                    className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
-                    {group.name}
-                  </a>
-                </li>
-              ))}
+              {group_state
+                .filter((group) => group?.name?.includes(searchTerm))
+                .map((group, index) => (
+                  <li key={index}>
+                    <a
+                      onClick={() =>
+                        manage_selected_groups(
+                          { name: group.name, id: group.id },
+                          "add"
+                        )
+                      }
+                      className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    >
+                      {group.name}
+                    </a>
+                  </li>
+                ))}
             </ul>
           </div>
         </>
@@ -94,6 +120,27 @@ export default function Whatsapp() {
         ))}
 
       <QR_modal />
+
+      <div>
+        <div>add to group</div>
+        <input
+          type="search"
+          class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="Search"
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
+
+        <button
+          id="dropdownHoverButton"
+          data-dropdown-toggle="dropdownHover"
+          data-dropdown-trigger="hover"
+          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          type="button"
+          onClick={handleAddParticipant}
+        >
+          Add Number
+        </button>
+      </div>
     </div>
   );
 }
