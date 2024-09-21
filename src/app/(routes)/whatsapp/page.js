@@ -1,12 +1,14 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
-import QR_modal from "../_components/QR_modal";
+import QR_modal from "../../_components/QR_modal";
 import { MyContext } from "@/context/context";
 import { add_whatsapp_participants_in_group } from "@/utils/utils";
+const countryCodes = require("country-codes-list");
 
 export default function Whatsapp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState([]);
   const { group_state, selected_groups, manage_selected_groups } =
     useContext(MyContext);
   const [dropdown, setdropdown] = useState(false);
@@ -20,8 +22,18 @@ export default function Whatsapp() {
   };
 
   useEffect(() => {
-    console.log(searchTerm);
-  }, [searchTerm]);
+    const myCountryCodesObject = countryCodes.customList(
+      "countryCode",
+      "+{countryCallingCode}"
+    );
+    setCountryCode(myCountryCodesObject);
+  }, []);
+
+  useEffect(() => {
+    Object.entries(countryCode).forEach(([key, value]) =>
+      console.log(key, value)
+    );
+  }, [countryCode]);
 
   return (
     <div>
@@ -64,7 +76,7 @@ export default function Whatsapp() {
             <input
               type="search"
               id="search"
-              class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -122,10 +134,39 @@ export default function Whatsapp() {
       <QR_modal />
 
       <div>
-        <div>add to group</div>
+        <div>add number group</div>
+        <div
+          id="dropdownHover"
+          className={`z-10 ${
+            dropdown ? "" : "hidden"
+          } bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 max-h-48 overflow-y-auto`}
+        >
+          <input
+            type="search"
+            id="search"
+            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Search"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <ul
+            className="py-2 text-sm text-gray-700 dark:text-gray-200"
+            aria-labelledby="dropdownHoverButton"
+          >
+            {countryCode.length > 0 &&
+              countryCode.map((key, value) => {
+                console.log(key);
+                return (
+                  <>
+                    {key} {value}
+                  </>
+                );
+              })}
+          </ul>
+        </div>
         <input
           type="search"
-          class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           placeholder="Search"
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
