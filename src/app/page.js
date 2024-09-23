@@ -6,6 +6,7 @@ import { setDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useRef, useState } from "react";
 import Cards from "../custom_components/Custom_card/Cards";
+import Image from "next/image";
 
 export default function Home() {
   const [does_name_exist, set_name_exist] = useState(false);
@@ -222,13 +223,14 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="bg-[#F5F5F5] flex-1 p-2">
+          <div className="flex-1 p-2 flex flex-col pt-20">
             <div className="mt-2">
               <Cards
                 have_svg={true}
                 pill_text="Your Earnings"
                 heading="$30.00"
                 subheading="Number of members:"
+                mainContainerClass="shadow-lg  translate-x-[-40px]"
                 subtext="20,591"
               />
             </div>
@@ -236,7 +238,7 @@ export default function Home() {
               <Cards
                 heading="Connect Platforms"
                 headingClassName="text-xl text-center"
-                mainContainerClass={"p-1"}
+                mainContainerClass={"p-1 shadow-lg"}
                 custom_component={
                   <div className="flex-1 flex flex-col">
                     <div className="items-center flex justify-center">
@@ -253,24 +255,52 @@ export default function Home() {
                         />
                       </svg>
                     </div>
-                    <div className="flex">
-                      <div className="relative w-full overflow-hidden flex-1">
-                        <div
-                          className="
-                        bg-gray-900/10 shadow-lg backdrop-blur-[12.2px]  border-gray-900/10 
-                        rounded-full  h-96 w-96 absolute top-1/4 left-1/2 transform -translate-x-1/2"
-                        ></div>
-                        <div
-                          className="
-                        bg-gray-900/20 shadow-lg backdrop-blur-[12.2px]  border-gray-900/20 
-                        
-                        rounded-full  h-96 w-96 absolute top-2/4 left-1/2 transform -translate-x-1/2"
-                        ></div>
-                        <div
-                          className="
-                        bg-gray-900/30 shadow-lg backdrop-blur-[12.2px]  border-gray-900/30
-                        rounded-full  h-96 w-96 absolute top-3/4 left-1/2 transform -translate-x-1/2"
-                        ></div>
+                    <div className="flex  flex-1 flex-col">
+                      <div className="flex  justify-around flex-1">
+                        <Image
+                          src="/assets/social_icons/discord.png"
+                          width={24}
+                          height={24}
+                          alt="Discord Icon"
+                          className="object-contain"
+                        />
+                        <Image
+                          src="/assets/social_icons/youtube.png"
+                          width={24}
+                          height={24}
+                          alt="youtube Icon"
+                          className="object-contain"
+                        />
+                        <Image
+                          src="/assets/social_icons/instagram.png"
+                          width={24}
+                          height={24}
+                          alt="instagram Icon"
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="flex  justify-around flex-1">
+                        <Image
+                          src="/assets/social_icons/whatsapp.png"
+                          width={24}
+                          height={24}
+                          alt="whatsapp Icon"
+                          className="object-contain"
+                        />
+                        <Image
+                          src="/assets/social_icons/slack.png"
+                          width={24}
+                          height={24}
+                          alt="slack Icon"
+                          className="object-contain"
+                        />
+                        <Image
+                          src="/assets/social_icons/facebook.png"
+                          width={24}
+                          height={24}
+                          alt="facebook Icon"
+                          className="object-contain"
+                        />
                       </div>
                     </div>
                   </div>
