@@ -116,16 +116,16 @@ export default function page() {
             </div>
           </>
         ) : index == 1 ? (
+          <></>
+        ) : index == 2 ? (
           <>
             <div className="flex flex-wrap">
-              <Chat_box />
-              <Chat_box />
-              <Chat_box />
-              <Chat_box />
+              <Chat_box icon_name="whatsapp" button_color="bg-green-400" />
+              <Chat_box icon_name="whatsapp" button_color="bg-blue-400" />
+              <Chat_box icon_name="whatsapp" button_color="bg-green-400" />
+              <Chat_box icon_name="whatsapp" button_color="bg-green-400" />
             </div>
           </>
-        ) : index == 2 ? (
-          <></>
         ) : (
           <></>
         )}
