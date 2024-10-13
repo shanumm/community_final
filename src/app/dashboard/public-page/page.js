@@ -1,4 +1,5 @@
 "use client";
+import Chat_box from "@/custom_components/chat_box/chat_box";
 import React, { useState } from "react";
 
 export default function page() {
