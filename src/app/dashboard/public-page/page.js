@@ -116,7 +116,14 @@ export default function page() {
             </div>
           </>
         ) : index == 1 ? (
-          <></>
+          <>
+            <div className="flex flex-wrap">
+              <Chat_box />
+              <Chat_box />
+              <Chat_box />
+              <Chat_box />
+            </div>
+          </>
         ) : index == 2 ? (
           <></>
         ) : (

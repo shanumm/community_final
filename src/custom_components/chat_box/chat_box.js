@@ -5,7 +5,7 @@ export default function Chat_box() {
   var name = "Discord";
   var des = "Link your Discord account to connect your server";
   return (
-    <div className="border h-56 w-80 border-slate-300 justify-start pl-6 pt-4 rounded-xl">
+    <div className="border h-56 w-80 border-slate-300 justify-start pl-6 pt-4 rounded-xl mr-8 mb-8">
       <div className="pb-4">
         {" "}
         <Image
