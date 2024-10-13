@@ -8,6 +8,8 @@ export const MyProvider = ({ children }) => {
   const [group_state, set_group_state] = useState([]);
   const [selected_groups, set_selected_groups] = useState([]);
   const [whatsapp_qr_generated, set_whatsapp_qr_generated] = useState(false);
+  const [is_signedIn, setIs_signedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   const manage_selected_groups = (group, action = "add") => {
     if (action === "add") {
@@ -25,6 +27,16 @@ export const MyProvider = ({ children }) => {
     }
   };
 
+  const handle_sign_in = (user) => {
+    if (user) {
+      setIs_signedIn(true);
+      setUser(user);
+    } else {
+      setUser(null);
+      setIs_signedIn(false);
+    }
+  };
+
   return (
     <MyContext.Provider
       value={{
@@ -34,6 +46,9 @@ export const MyProvider = ({ children }) => {
         manage_selected_groups,
         whatsapp_qr_generated,
         set_whatsapp_qr_generated,
+        handle_sign_in,
+        user,
+        is_signedIn,
       }}
     >
       {children}
