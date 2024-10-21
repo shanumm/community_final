@@ -108,7 +108,7 @@ export const MyProvider = ({ children }) => {
   useEffect(() => {
     const get_user_data = async (email) => {
       const users_details = await get_user_details(email);
-      console.log(users_details);
+      setUser_details(users_details.value.res);
     };
     if (user) {
       console.log(user.email, "thisis the user");
