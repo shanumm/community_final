@@ -3,13 +3,15 @@ import ToastComponent from "@/custom_components/toast/toast";
 import Grid from "../custom_components/background/grid";
 import Navigation from "../custom_components/top_navigation/navigation";
 import { setDoc, doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase";
-import { useRef, useState } from "react";
+import { auth, db } from "../../firebase";
+import { useContext, useEffect, useRef, useState } from "react";
 import Cards from "../custom_components/Custom_card/Cards";
 import Image from "next/image";
+import { MyContext } from "@/context/context";
 
 export default function Home() {
   const [does_name_exist, set_name_exist] = useState(false);
+  const { user, is_signedIn, handle_sign_in } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef(null); // Ref to access the input element
   const testing_function = async () => {
@@ -43,6 +45,8 @@ export default function Home() {
     }
     setLoading(false);
   };
+
+ 
 
   const Check_name = () => (
     <div className="flex mt-12 mb-2 h-auto items-center p-2 rounded-lg w-1/2 bg-white shadow-lg">

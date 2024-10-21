@@ -4,7 +4,7 @@ import {
   connect_whatsapp_client,
   get_whatsapp_groups,
   get_whatsapp_qr_code,
-} from "@/utils/utils";
+} from "@/utils/whatsapp_utils/utils";
 import { MyContext } from "@/context/context";
 
 export default function QR_modal() {

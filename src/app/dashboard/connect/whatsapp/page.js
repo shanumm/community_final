@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 import QR_modal from "../../../_components/QR_modal";
 import { MyContext } from "@/context/context";
-import { add_whatsapp_participants_in_group } from "@/utils/utils";
+import { add_whatsapp_participants_in_group } from "@/utils/whatsapp_utils/utils";
 const countryCodes = require("country-codes-list");
 
 export default function Whatsapp() {

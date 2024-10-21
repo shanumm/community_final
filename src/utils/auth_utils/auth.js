@@ -1,7 +1,7 @@
 // src/auth.js
 
 import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from "../../firebase";
+import { auth, provider } from "../../../firebase";
 import { MyContext } from "@/context/context";
 // import { useContext } from "react";
 

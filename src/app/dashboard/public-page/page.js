@@ -1,9 +1,11 @@
 "use client";
+import { MyContext } from "@/context/context";
 import Chat_box from "@/custom_components/chat_box/chat_box";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 export default function page() {
   const [index, setIndex] = useState(0);
+  const { user } = useContext(MyContext);
 
   const Top_navigation = () => (
     <div>
@@ -42,7 +44,14 @@ export default function page() {
                     <input
                       className="h-full w-full outline-none"
                       type="text"
-                      value={"testing-111"}
+                      value={
+                        user
+                          ? String(user?.displayName)
+                              .toLowerCase()
+                              .split(" ")
+                              .join("-")
+                          : "testing"
+                      }
                     />
                     <svg
                       width="24"
