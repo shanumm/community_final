@@ -4,7 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore";
-import { name_availabilty } from "@/utils/name_taken_utils/name_taken";
+import { add_new_url, name_availabilty } from "@/utils/name_utils/name_utils";
 import generateRandomString from "@/utils/helper/helper";
 import { get_user_details } from "@/utils/user_details/user_details";
 
@@ -55,19 +55,14 @@ export const MyProvider = ({ children }) => {
       const sanitizedDisplayName = String(authUser.displayName)
         .toLowerCase()
         .replace(/\s+/g, "-");
-
-      const userNameDocRef = doc(db, "taken_user_names", sanitizedDisplayName);
-
-      const userNameData = {
-        user_name: sanitizedDisplayName,
-        user_id: authUser.uid,
-      };
-      console.log(userNameData);
-      await setDoc(userNameDocRef, userNameData);
+      const add_new_name_url = await add_new_url(
+        sanitizedDisplayName,
+        authUser.uid
+      );
+      console.log(add_new_name_url);
       return sanitizedDisplayName;
     } else {
       const updated_name = generateRandomString(authUser.displayName);
-      console.log(updated_name, ">>>>>>>");
       authUser.displayName = updated_name;
       return await update_user_name(authUser);
     }
@@ -75,6 +70,7 @@ export const MyProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      console.log(authUser, is_signedIn);
       if (authUser && !is_signedIn) {
         try {
           const userDocRef = doc(db, "users", authUser.email); // Use user's UID as document ID
@@ -88,13 +84,19 @@ export const MyProvider = ({ children }) => {
               email: authUser.email,
               displayName: authUser.displayName || "",
               user_name: added_user_name,
+              comm_img:
+                "https://cdn.pixabay.com/photo/2024/06/12/16/25/plant-8825881_1280.png",
+              cover_img:
+                "https://cdn.pixabay.com/photo/2020/09/03/03/43/abstract-5540113_1280.png",
             };
 
             await setDoc(userDocRef, userData);
+            get_user_data(authUser.email);
 
             console.log("User document created:", userData);
           } else {
             console.log("User document already exists.");
+            get_user_data(authUser.email);
           }
           handle_sign_in(authUser); // Update user state
         } catch (e) {
@@ -105,16 +107,10 @@ export const MyProvider = ({ children }) => {
     return () => unsubscribe(); // Clean up the listener on unmount
   }, []);
 
-  useEffect(() => {
-    const get_user_data = async (email) => {
-      const users_details = await get_user_details(email);
-      setUser_details(users_details.value.res);
-    };
-    if (user) {
-      console.log(user.email, "thisis the user");
-      get_user_data(user.email);
-    }
-  }, [user]);
+  const get_user_data = async (email) => {
+    const users_details = await get_user_details(email);
+    setUser_details(users_details.value.res);
+  };
 
   return (
     <MyContext.Provider
