@@ -4,9 +4,10 @@ import { MyContext } from "@/context/context";
 import { signInWithGoogle } from "@/utils/auth_utils/auth";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import React, { useContext, useEffect } from "react";
-import { auth } from "../../../firebase";
+import { auth, db } from "../../../firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 
 export default function Navigation() {
   const { user, is_signedIn, handle_sign_in } = useContext(MyContext);
@@ -17,7 +18,6 @@ export default function Navigation() {
       signOut(auth)
         .then(() => {
           handle_sign_in(false);
-          console.log("logged out");
         })
         .catch((error) => {});
     } else {
@@ -26,7 +26,6 @@ export default function Navigation() {
         if (user) {
           console.log(user);
           handle_sign_in(user);
-          console.log("logged in");
           router.push("/dashboard");
         }
       });

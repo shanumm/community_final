@@ -1,4 +1,4 @@
-export default function generateRandomString(user_name, length = 5) {
+export const generateRandomString = (user_name, length = 5) => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -14,4 +14,8 @@ export default function generateRandomString(user_name, length = 5) {
     .toLowerCase()
     .split(" ")
     .join(" ");
-}
+};
+
+export const formatName = (user_name) => {
+  return String(user_name).toLowerCase().replace(/\s+/g, "-");
+};

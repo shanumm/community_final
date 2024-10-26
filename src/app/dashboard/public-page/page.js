@@ -4,10 +4,10 @@ import Chat_box from "@/custom_components/chat_box/chat_box";
 import {
   add_user_profile,
   delete_url,
-  name_availabilty,
+  name_availability,
   update_page_url_api,
 } from "@/utils/name_utils/name_utils";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
 import { db } from "../../../../firebase";
@@ -86,7 +86,7 @@ const LoaderIcon = () => (
 export default function page() {
   const [index, setIndex] = useState(0);
   const { user_details } = useContext(MyContext);
-  const [isUrlChanged, setIsUrlChanged] = useState(false);
+  const [userProfileData, setUserProfileData] = useState(null);
   const [isUrlUpdating, setIsUrlUpdating] = useState(false);
   const [updation_message, setUpdation_message] = useState("");
   const [comm_image, setComm_image] = useState("");
@@ -106,64 +106,66 @@ export default function page() {
   });
 
   const [original_url, set_original_url] = useState(
-    user_details?.user_name || null
+    userProfileData?.user_name || null
   );
   const [public_url, setPublicUrl] = useState(
-    user_details?.user_name || "Loading..."
+    userProfileData?.user_name || "Loading..."
   );
 
   useEffect(() => {
-    setPublicUrl(user_details?.user_name || "Loading...");
-    set_original_url(user_details?.user_name || null);
-    setComm_image(user_details?.comm_img || "Loading...");
-    setCover_img(user_details?.cover_img || "Loading...");
-    setPageDetails({
-      Title: user_details?.pageDetails?.Title || "",
-      Host: user_details?.pageDetails?.Host || "",
-      Description: user_details?.pageDetails?.Description || "",
-    });
+    if (user_details?.user_name) {
+      getUserProfileData(user_details);
+    }
   }, [user_details]);
 
   useEffect(() => {
-    if (original_url && original_url != public_url) {
-      setIsUrlChanged(true);
-    } else {
-      setIsUrlChanged(false);
-    }
-  }, [public_url]);
+    setPublicUrl(userProfileData?.user_name || "Loading...");
+    set_original_url(userProfileData?.user_name || null);
+    setPageDetails({
+      ...pageDetails,
+      Title: userProfileData?.pageDetails?.Title || "",
+      Host: userProfileData?.pageDetails?.Host || "",
+      Description: userProfileData?.pageDetails?.Description || "",
+    });
+  }, [userProfileData]);
+
+  const getUserProfileData = async (user_details) => {
+    const userProfile = doc(db, "user_profiles", user_details.user_name);
+    const userProfileSnap = await getDoc(userProfile);
+    setUserProfileData(userProfileSnap.data());
+  };
 
   const update_image_url = async (key, value) => {
-    const img_ref = doc(db, "users", user_details.email);
-
+    setIsLoading({ ...isLoading, comm_image: true });
+    const img_ref = doc(db, "user_profiles", userProfileData.user_name);
     await updateDoc(img_ref, {
       [key]: value,
     });
+    setIsLoading({ ...isLoading, comm_image: false });
     location.reload();
   };
 
   const update_page_url = async (url) => {
     setIsUrlUpdating(true);
-    const check_name_availability = await name_availabilty(url);
+    const check_name_availability = await name_availability(url);
     if (check_name_availability?.value?.available) {
       const update_page_url = await update_page_url_api(
         url,
-        user_details.email,
-        user_details.uid,
-        original_url
+        userProfileData.email,
+        userProfileData
       );
       const delete_older_page_url = await delete_url(original_url);
       setUpdation_message("");
+      location.reload();
     } else {
       setUpdation_message("Already Taken");
     }
-
     setIsUrlUpdating(false);
-    location.reload();
   };
 
   const updatePageDetailsField = async (key, value) => {
     setIsLoading((prevState) => ({ ...prevState, [key]: true }));
-    const userRef = doc(db, "users", user_details.email);
+    const userRef = doc(db, "user_profiles", userProfileData.user_name);
 
     await updateDoc(userRef, {
       [`pageDetails.${key}`]: value,
@@ -271,24 +273,25 @@ export default function page() {
               </div>
             </div>
             <div className="flex mb-2">
-              {public_url.length > 0 && isUrlChanged && (
-                <button
-                  type="button"
-                  class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-                  onClick={() => update_page_url(public_url)}
-                >
-                  {isUrlUpdating && <LoaderIcon />}
-                  Update Url
-                </button>
-              )}
-              {public_url.length > 0 && isUrlChanged && (
-                <button
-                  type="button"
-                  class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  onClick={() => setPublicUrl(original_url)}
-                >
-                  Reset
-                </button>
+              {public_url.length > 0 && public_url != original_url && (
+                <>
+                  <button
+                    type="button"
+                    class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                    onClick={() => update_page_url(public_url)}
+                  >
+                    {isUrlUpdating && <LoaderIcon />}
+                    Update Url
+                  </button>
+
+                  <button
+                    type="button"
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    onClick={() => setPublicUrl(original_url)}
+                  >
+                    Reset
+                  </button>
+                </>
               )}
             </div>
             <div className="text-red-700 mb-2">{updation_message || ""}</div>
@@ -298,7 +301,7 @@ export default function page() {
               <div className="w-52 h-52 bg-gray-500 rounded-lg relative overflow-hidden group">
                 <Image
                   className="transition-opacity duration-300"
-                  src={user_details?.comm_img}
+                  src={userProfileData?.comm_img}
                   layout="fill"
                   objectFit="cover"
                   alt="community image"
@@ -322,13 +325,13 @@ export default function page() {
                     class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
                     onClick={() => update_image_url("comm_img", comm_image)}
                   >
-                    {isUrlUpdating && <LoaderIcon />}
+                    {isLoading.comm_image && <LoaderIcon />}
                     Update Image Url
                   </button>
                   <button
                     type="button"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    onClick={() => setComm_image(user_details.comm_img)}
+                    onClick={() => setComm_image(userProfileData.comm_img)}
                   >
                     Reset
                   </button>
@@ -366,7 +369,7 @@ export default function page() {
               <div className="w-96 h-72 border rounded-lg bg-red-400 relative overflow-hidden">
                 <Image
                   className="transition-opacity duration-300"
-                  src={user_details?.cover_img}
+                  src={userProfileData?.cover_img}
                   layout="fill"
                   objectFit="cover"
                   alt="community image"
@@ -390,13 +393,13 @@ export default function page() {
                     class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
                     onClick={() => update_image_url("cover_img", cover_img)}
                   >
-                    {isUrlUpdating && <LoaderIcon />}
+                    {isLoading.cover_img && <LoaderIcon />}
                     Update Image Url
                   </button>
                   <button
                     type="button"
                     class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                    onClick={() => setCover_img(user_details.cover_img)}
+                    onClick={() => setCover_img(userProfileData.cover_img)}
                   >
                     Reset
                   </button>

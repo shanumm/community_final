@@ -1,122 +1,92 @@
 import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase";
+import { formatName } from "@/utils/helper/helper";
 
-const check_name_availabilty = async (param) => {
+// Common function to handle Firebase operations
+const handleFirebaseOperation = async (operation, ref, data = {}) => {
   try {
     return await new Promise(async (resolve, reject) => {
-      const userNamesDocRef = doc(db, "taken_user_names", param);
-      const userNamesDocSnap = await getDoc(userNamesDocRef);
-      if (userNamesDocSnap.exists()) {
-        resolve({ res: "user exists", available: 0 });
-      } else {
-        resolve({ res: "user doesn't exists", available: 1 });
+      switch (operation) {
+        case "get":
+          const docSnap = await getDoc(ref);
+          resolve(
+            docSnap.exists()
+              ? { res: "user exists", available: 0 }
+              : { res: "user doesn't exist", available: 1 }
+          );
+          break;
+        case "set":
+          await setDoc(ref, data);
+          resolve(data);
+          break;
+        case "update":
+          await updateDoc(ref, data);
+          resolve(data);
+          break;
+        case "delete":
+          await deleteDoc(ref);
+          resolve(ref.id);
+          break;
+        default:
+          reject(new Error("Invalid operation"));
       }
-
-      resolve(param);
     });
   } catch (err) {
-    reject(err);
-  }
-};
-const update_page_url = async (param, email, uid, ori) => {
-  try {
-    return await new Promise(async (resolve, reject) => {
-      const sanitizedDisplayName = String(param)
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-      console.log(sanitizedDisplayName, uid);
-      const add_new_name_url = await add_page_url(sanitizedDisplayName, uid);
-
-      const userNamesDocRef = doc(db, "users", email);
-      await updateDoc(userNamesDocRef, {
-        user_name: param,
-      });
-      resolve(param);
-    });
-  } catch (err) {
-    reject(err);
+    throw err;
   }
 };
 
-const delete_page_url = async (param) => {
-  try {
-    return await new Promise(async (resolve, reject) => {
-      const userNameDocRef = doc(db, "taken_user_names", param);
-      deleteDoc(userNameDocRef);
-      resolve(param);
-    });
-  } catch (err) {
-    reject(err);
-  }
+// Wrapper functions
+const checkNameAvailability = (param) => {
+  const userNamesDocRef = doc(db, "user_profiles", param);
+  return handleFirebaseOperation("get", userNamesDocRef);
 };
 
-const add_page_url = async (param, user_id) => {
-  console.log(param, "----", user_id);
-  try {
-    return await new Promise(async (resolve, reject) => {
-      const userNameDocRef = doc(db, "taken_user_names", param);
-      const userNameData = {
-        user_name: param,
-        user_id: user_id,
-      };
-      await setDoc(userNameDocRef, userNameData);
-      resolve(param);
-    });
-  } catch (err) {
-    reject(err);
-  }
+const updatePageUrl = async (param, email, user_data) => {
+  const sanitizedDisplayName = formatName(param);
+  await createUserProfile(sanitizedDisplayName, user_data);
+  const userDocRef = doc(db, "users", email);
+  return handleFirebaseOperation("update", userDocRef, { user_name: param });
 };
 
-const create_user_profile = async (param, user_id) => {
-  console.log(param, "----", user_id);
+const deletePageUrl = (param) => {
+  const userNameDocRef = doc(db, "user_profiles", param);
+  return handleFirebaseOperation("delete", userNameDocRef);
 };
 
+const createUserProfile = (param, userData) => {
+  userData["user_name"] = param;
+  const userProfileDocRef = doc(db, "user_profiles", param);
+  return handleFirebaseOperation("set", userProfileDocRef, userData);
+};
+
+// Request handler
 export default async function handler(req, res) {
-  const { process, param, email, user_id, ori } = req.query;
-  if (process == "name_check") {
-    try {
-      const name = String(param).toLowerCase().split(" ").join("-");
-      const test = await check_name_availabilty(name);
-      res.status(200).json({ message: "success", value: test });
-    } catch (err) {
-      console.log(err);
-      res.status(300).json({ message: err });
+  const { process, param, email, user_data } = req.query;
+  try {
+    const name = String(param).toLowerCase().split(" ").join("-");
+    let result;
+
+    switch (process) {
+      case "name_check":
+        result = await checkNameAvailability(name);
+        break;
+      case "update_name":
+        result = await updatePageUrl(name, email, JSON.parse(user_data));
+        break;
+      case "add_user_profile":
+        result = await createUserProfile(name, JSON.parse(user_data));
+        break;
+      case "delete_url":
+        result = await deletePageUrl(name);
+        break;
+      default:
+        throw new Error("Invalid process");
     }
-  } else if (process == "update_name") {
-    try {
-      const name = String(param).toLowerCase().split(" ").join("-");
-      const test = await update_page_url(name, email, user_id, ori);
-      res.status(200).json({ message: "success", value: test });
-    } catch (err) {
-      console.log(err);
-      res.status(300).json({ message: err });
-    }
-  } else if (process == "add_new_url") {
-    try {
-      const name = String(param).toLowerCase().split(" ").join("-");
-      const test = await add_page_url(name, user_id);
-      res.status(200).json({ message: "success", value: test });
-    } catch (err) {
-      console.log(err);
-      res.status(300).json({ message: err });
-    }
-  } else if (process == "delete_url") {
-    try {
-      const name = String(param).toLowerCase().split(" ").join("-");
-      const test = await delete_page_url(name);
-      res.status(200).json({ message: "success", value: test });
-    } catch (err) {
-      console.log(err);
-      res.status(300).json({ message: err });
-    }
-  } else if (process == "add_user_profile") {
-    try {
-      const name = String(param).toLowerCase().split(" ").join("-");
-      console.log(name, user_id, ">>>>>>>>>>");
-      res.status(200).json({ message: "success", value: "testing" });
-    } catch (err) {
-      console.log(err);
-      res.status(300).json({ message: err });
-    }
+
+    res.status(200).json({ message: "success", value: result });
+  } catch (err) {
+    console.error(err);
+    res.status(300).json({ message: err.message });
   }
 }

@@ -3,9 +3,13 @@
 import { onAuthStateChanged } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
-import { add_new_url, name_availabilty } from "@/utils/name_utils/name_utils";
-import generateRandomString from "@/utils/helper/helper";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  add_new_user_data,
+  add_user_profile,
+  name_availability,
+} from "@/utils/name_utils/name_utils";
+import { formatName, generateRandomString } from "@/utils/helper/helper";
 import { get_user_details } from "@/utils/user_details/user_details";
 
 export const MyContext = createContext();
@@ -21,7 +25,6 @@ export const MyProvider = ({ children }) => {
   const manage_selected_groups = (group, action = "add") => {
     if (action === "add") {
       set_selected_groups((prev) => {
-        // Check if a group with the same name is already in the array
         if (prev.some((item) => item.name === group.name)) {
           return prev; // Return the current array if a group with the same name is already present
         }
@@ -34,68 +37,61 @@ export const MyProvider = ({ children }) => {
     }
   };
 
-  const handle_sign_in = (user) => {
-    if (user) {
-      setIs_signedIn(true);
-      setUser(user);
-    } else {
-      setUser(null);
-      setIs_signedIn(false);
-    }
+  const handle_sign_in = (authUser) => {
+    setUser(authUser || null);
+    setIs_signedIn(!!authUser);
   };
 
-  const update_user_name = async (authUser) => {
-    const check_name_availability = await name_availabilty(
-      authUser.displayName
-    );
-    if (
-      check_name_availability &&
-      check_name_availability.value?.available === 1
-    ) {
-      const sanitizedDisplayName = String(authUser.displayName)
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-      const add_new_name_url = await add_new_url(
-        sanitizedDisplayName,
-        authUser.uid
-      );
-      console.log(add_new_name_url);
+  const check_name_available = async (name) => {
+    const check_name_availability = await name_availability(name);
+    return check_name_availability.value?.available;
+  };
+
+  const add_new_user = async (authUser) => {
+    const sanitizedDisplayName = formatName(authUser.displayName);
+    const checking_value = await check_name_available(sanitizedDisplayName);
+    if (checking_value) {
       return sanitizedDisplayName;
     } else {
       const updated_name = generateRandomString(authUser.displayName);
       authUser.displayName = updated_name;
-      return await update_user_name(authUser);
+      return await add_new_user(authUser);
     }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      console.log(authUser, is_signedIn);
       if (authUser && !is_signedIn) {
         try {
           const userDocRef = doc(db, "users", authUser.email); // Use user's UID as document ID
           const userDocSnap = await getDoc(userDocRef);
 
           if (!userDocSnap.exists()) {
-            const added_user_name = await update_user_name(authUser);
-            console.log(added_user_name);
+            const added_new_user_name = await add_new_user(authUser);
+
             const userData = {
-              uid: authUser.uid,
               email: authUser.email,
+              user_name: added_new_user_name,
+              uid: authUser.uid,
+            };
+            await setDoc(userDocRef, userData);
+
+            const userProfileData = {
+              email: authUser.email,
+              user_name: added_new_user_name,
               displayName: authUser.displayName || "",
-              user_name: added_user_name,
               comm_img:
                 "https://cdn.pixabay.com/photo/2024/06/12/16/25/plant-8825881_1280.png",
               cover_img:
                 "https://cdn.pixabay.com/photo/2020/09/03/03/43/abstract-5540113_1280.png",
             };
+            const add_new_name_url = await add_user_profile(
+              added_new_user_name,
+              userProfileData
+            );
 
-            await setDoc(userDocRef, userData);
             get_user_data(authUser.email);
-
-            console.log("User document created:", userData);
           } else {
-            console.log("User document already exists.");
             get_user_data(authUser.email);
           }
           handle_sign_in(authUser); // Update user state
