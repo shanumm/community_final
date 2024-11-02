@@ -67,19 +67,22 @@ export const MyProvider = ({ children }) => {
           const userDocSnap = await getDoc(userDocRef);
 
           if (!userDocSnap.exists()) {
+            const display_name = authUser.displayName;
             const added_new_user_name = await add_new_user(authUser);
 
             const userData = {
               email: authUser.email,
               user_name: added_new_user_name,
               uid: authUser.uid,
+              display_name: display_name,
             };
+            print(userData, ">>>>>>>>>>>>>>");
             await setDoc(userDocRef, userData);
 
             const userProfileData = {
               email: authUser.email,
               user_name: added_new_user_name,
-              displayName: authUser.displayName || "",
+              displayName: display_name || "",
               comm_img:
                 "https://cdn.pixabay.com/photo/2024/06/12/16/25/plant-8825881_1280.png",
               cover_img:
