@@ -1,6 +1,7 @@
 "use client";
 import { MyContext } from "@/context/context";
 import Chat_box from "@/custom_components/chat_box/chat_box";
+
 import {
   add_user_profile,
   delete_url,
@@ -12,6 +13,7 @@ import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
 import { db } from "../../../../firebase";
 import Link from "next/link";
+import TextEditor from "@/custom_components/quill_text_editor/TextEditor";
 
 const InputComponent = ({
   title,
@@ -20,48 +22,50 @@ const InputComponent = ({
   setPageDetails,
   isLoading,
   updatePageDetailsField,
-}) => (
-  <>
-    {type == "input" ? (
-      <div className="mt-8 p-4  border border-gray-300 rounded-lg">
-        <div className="text-xs text-gray-400 pb-2">{title}</div>
-        <input
-          className="outline-none w-full"
-          value={pageDetails[title]}
-          onChange={(e) =>
-            setPageDetails({
-              ...pageDetails,
-              [title]: e.target.value,
-            })
-          }
-        />
+}) => {
+  return (
+    <>
+      {type == "input" ? (
+        <div className="mt-8 p-4  border border-gray-300 rounded-lg">
+          <div className="text-xs text-gray-400 pb-2">{title}</div>
+          <input
+            className="outline-none w-full"
+            value={pageDetails[title]}
+            onChange={(e) =>
+              setPageDetails({
+                ...pageDetails,
+                [title]: e.target.value,
+              })
+            }
+          />
+        </div>
+      ) : (
+        <div className="mt-8  p-4 border border-gray-300 rounded-lg">
+          <div className="text-xs text-gray-400 pb-2">Description</div>
+          <textarea
+            className="w-full outline-none"
+            value={pageDetails[title]}
+            onChange={(e) =>
+              setPageDetails({
+                ...pageDetails,
+                [title]: e.target.value,
+              })
+            }
+          />
+        </div>
+      )}
+      <div className="flex my-4">
+        <button
+          type="button"
+          class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+          onClick={() => updatePageDetailsField(title, pageDetails[title])}
+        >
+          {isLoading[title] ? <LoaderIcon /> : "Update " + title}
+        </button>
       </div>
-    ) : (
-      <div className="mt-8  p-4 border border-gray-300 rounded-lg">
-        <div className="text-xs text-gray-400 pb-2">Description</div>
-        <textarea
-          className="w-full outline-none"
-          value={pageDetails[title]}
-          onChange={(e) =>
-            setPageDetails({
-              ...pageDetails,
-              [title]: e.target.value,
-            })
-          }
-        />
-      </div>
-    )}
-    <div className="flex my-4">
-      <button
-        type="button"
-        class="flex items-center text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
-        onClick={() => updatePageDetailsField(title, pageDetails[title])}
-      >
-        {isLoading[title] ? <LoaderIcon /> : "Update " + title}
-      </button>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 const LoaderIcon = () => (
   <svg
@@ -93,7 +97,6 @@ export default function page() {
   const [cover_img, setCover_img] = useState("");
   const [pageDetails, setPageDetails] = useState({
     Title: "",
-    Host: "",
     Description: "",
   });
   const [isLoading, setIsLoading] = useState({
@@ -101,7 +104,6 @@ export default function page() {
     comm_image: false,
     cover_img: false,
     title: false,
-    host: false,
     description: false,
   });
 
@@ -124,7 +126,6 @@ export default function page() {
     setPageDetails({
       ...pageDetails,
       Title: userProfileData?.pageDetails?.Title || "",
-      Host: userProfileData?.pageDetails?.Host || "",
       Description: userProfileData?.pageDetails?.Description || "",
     });
   }, [userProfileData]);
@@ -347,14 +348,6 @@ export default function page() {
               updatePageDetailsField={updatePageDetailsField}
             />
             <InputComponent
-              title="Host"
-              type="input"
-              pageDetails={pageDetails}
-              setPageDetails={setPageDetails}
-              isLoading={isLoading}
-              updatePageDetailsField={updatePageDetailsField}
-            />
-            <InputComponent
               title="Description"
               type="textarea"
               pageDetails={pageDetails}
@@ -421,6 +414,7 @@ export default function page() {
         ) : (
           <></>
         )}
+        <TextEditor />
       </div>
     </div>
   );
