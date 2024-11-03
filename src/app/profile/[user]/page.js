@@ -6,31 +6,33 @@ import { get_profile_details } from "@/utils/profile_details/profile_details";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { instance } from "../../../../razorpay";
+import LargeContainerBox from "@/custom_components/LargeContainerBox/LargeContainerBox";
 
 export default function Page({ params }) {
   const [user_profile, set_user_profile] = useState(null);
+  const [isPillActive, setisPillActive] = useState(1);
 
-  const printP = () => {
-    const aa = [4000, 3000, 40000, 20000];
-    setInterval(() => {
-      const amount = aa[Math.floor(Math.random() * aa.length)];
-      console.log(
-        `[ALERT] Payment Failed | Amount: ${amount} RS| Reason: Overload | Suggested Action: Increase Balance`
-      );
-    }, 2000);
-  };
-  printP();
+  // const printP = () => {
+  //   const aa = [4000, 3000, 40000, 20000];
+  //   setInterval(() => {
+  //     const amount = aa[Math.floor(Math.random() * aa.length)];
+  //     console.log(
+  //       `[ALERT] Payment Failed | Amount: ${amount} RS| Reason: Overload | Suggested Action: Increase Balance`
+  //     );
+  //   }, 2000);
+  // };
+  // printP();
 
-  useEffect(() => {
-    var options = {
-      amount: 50000, // amount in the smallest currency unit
-      currency: "INR",
-      receipt: "testing",
-    };
-    instance.orders.create(options, function (err, order) {
-      console.log(order, "this is order id");
-    });
-  }, []);
+  // useEffect(() => {
+  //   var options = {
+  //     amount: 50000, // amount in the smallest currency unit
+  //     currency: "INR",
+  //     receipt: "testing",
+  //   };
+  //   instance.orders.create(options, function (err, order) {
+  //     console.log(order, "this is order id");
+  //   });
+  // }, []);
 
   const test_obh = {
     displayName: "pushkar mishravbc8l",
@@ -83,55 +85,86 @@ export default function Page({ params }) {
   };
 
   return (
-    <div className="bg-[#F6F6F6] h-screen py-8">
+    <div className="bg-[#F6F6F6] min-h-screen py-8">
       <div className="w-1/2 mx-auto">
-        <div className="relative h-56 rounded-2xl overflow-hidden">
-          <Image
-            src={test_obh.cover_img}
-            layout="fill"
-            objectFit="cover"
-            alt="cover image"
-            className="overflow-hidden"
-          />
-        </div>
-        <div className="flex justify-between pt-2">
-          {/* below container */}
-          <div className="flex flex-1  h-max justify-between mx-2">
-            {test_obh.available_chats.map((chat) => (
-              <div className="p-2 rounded-lg h-max">{chat.icon}</div>
-            ))}
+        <div>
+          <div className="relative h-56 rounded-2xl overflow-hidden">
+            <Image
+              src={test_obh.cover_img}
+              layout="fill"
+              objectFit="cover"
+              alt="cover image"
+              className="overflow-hidden"
+            />
           </div>
-          <div className="flex-1 flex justify-center">
-            <div className="flex flex-col items-center -translate-y-16">
-              <div className="relative w-28 h-28 rounded-lg overflow-hidden">
-                <Image
-                  src={test_obh.comm_img}
-                  layout="fill"
-                  objectFit="cover"
-                  alt="cover image"
-                  className="overflow-hidden"
-                />
+          <div className="flex justify-between pt-2 h-max">
+            {/* below container */}
+            <div className="flex flex-1  h-max justify-between mx-2">
+              {test_obh.available_chats.map((chat) => (
+                <div className="p-2 rounded-lg h-max">{chat.icon}</div>
+              ))}
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="flex flex-col items-center -translate-y-16">
+                <div className="relative w-28 h-28 rounded-lg overflow-hidden">
+                  <Image
+                    src={test_obh.comm_img}
+                    layout="fill"
+                    objectFit="cover"
+                    alt="cover image"
+                    className="overflow-hidden"
+                  />
+                </div>
+                <div className="font-medium text-center py-2 text-gray-700 text-2xl">
+                  {test_obh.displayName}
+                </div>
+                <div className=" text-center">{test_obh.user_name}</div>
+                <div className=" text-center"></div>
               </div>
-              <div className="font-medium text-center py-2 text-gray-700 text-2xl">
-                {test_obh.displayName}
-              </div>
-              <div className=" text-center">{test_obh.user_name}</div>
-              <div className=" text-center">
-                {test_obh.available_chats.reduce(
-                  (total, chat) => total + chat.members,
-                  0
-                )}{" "}
-              </div>
-              <div>Members</div>
+            </div>
+            <div className="flex-1 flex justify-end pt-2 h-max text-sm">
+              {" "}
+              {test_obh.available_chats.reduce(
+                (total, chat) => total + chat.members,
+                0
+              )}{" "}
+              Members
             </div>
           </div>
-          <div className="flex-1 flex justify-center pt-2 h-max">testing</div>
         </div>
-      </div>
-      <div className="flex w-1/2 mx-auto">
-        <Pill name="testgin" active={true} />
-        <Pill name="testgin" />
-        <Pill name="testgin" />
+        <div className="flex my-4">
+          <Pill
+            name="testgin"
+            activePill={isPillActive == 1 ? true : false}
+            pillNumber={1}
+            handleActivePill={setisPillActive}
+          />
+          <Pill
+            name="testgin"
+            activePill={isPillActive == 2 ? true : false}
+            pillNumber={2}
+            handleActivePill={setisPillActive}
+          />
+          <Pill
+            name="testgin"
+            activePill={isPillActive == 3 ? true : false}
+            pillNumber={3}
+            handleActivePill={setisPillActive}
+          />
+        </div>
+        <LargeContainerBox
+          heading={"Lorem ipsum dolor sit."}
+          subheading={
+            "Lorem ipsum, dolor sit amet consectetur adipisicing elit."
+          }
+        />
+        <LargeContainerBox
+          heading={"Lorem ipsum dolor sit."}
+          subheading={
+            "Lorem ipsum, dolor sit amet consectetur adipisicing elit."
+          }
+        />
+        <LargeContainerBox heading={""} />
       </div>
     </div>
   );

@@ -1,13 +1,16 @@
 import React from "react";
 
-export default function Pill({ name, active }) {
-
-
+export default function Pill({
+  name,
+  activePill,
+  handleActivePill,
+  pillNumber,
+}) {
   return (
-    <div>
+    <div onClick={() => handleActivePill(pillNumber)}>
       <span
         class={`${
-          active ? "bg-gray-900 text-white" : "text-black"
+          activePill ? "bg-gray-900 text-white" : "text-black"
         }  text-xs font-medium px-4 py-2 rounded-full mr-2 cursor-pointer`}
       >
         {name}
