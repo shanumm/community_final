@@ -7,14 +7,13 @@ import {
 } from "@/utils/whatsapp_utils/utils";
 import { MyContext } from "@/context/context";
 
-export default function QR_modal() {
+export default function QR_modal({ isModalVisible, onClose }) {
   const {
     group_state,
     set_group_state,
     set_whatsapp_qr_generated,
     whatsapp_qr_generated,
   } = useContext(MyContext);
-  const [toggleModal, setToggleModal] = useState(false);
   const [qrCode, setQrCode] = useState("");
   const [showQr, setShowQr] = useState(false);
   const [timer, setTimer] = useState(180); // 3 minutes in seconds
@@ -22,14 +21,14 @@ export default function QR_modal() {
   const [groups_list, set_groups_list] = useState([]);
 
   useEffect(() => {
-    if (toggleModal) {
+    if (isModalVisible) {
       if (!whatsapp_qr_generated) {
         get_whatsapp_qr();
       } else {
         handle_whatsapp_connection();
       }
     }
-  }, [toggleModal]);
+  }, [isModalVisible]);
 
   useEffect(() => {
     let interval;
@@ -40,24 +39,12 @@ export default function QR_modal() {
       handle_whatsapp_connection();
     }
 
-    return () => clearInterval(interval); // Clear the interval when component unmounts or showQr changes
+    return () => clearInterval(interval);
   }, [showQr]);
 
   useEffect(() => {
     if (is_whatsapp_connected) handle_whatsapp_groups();
   }, [is_whatsapp_connected]);
-
-  // useEffect(() => {
-  //   const isConnected = localStorage.getItem("whatsappConnected");
-  //   if (isConnected) {
-  //     set_is_whatsapp_connected(true);
-  //     handle_whatsapp_groups(); // Fetch groups if already connected
-  //   }
-  // }, []);
-
-  const toggleModalHandler = () => {
-    setToggleModal((prev) => !prev);
-  };
 
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
@@ -68,9 +55,9 @@ export default function QR_modal() {
   const handle_whatsapp_connection = async () => {
     set_is_whatsapp_connected(false);
     const whatsapp_status = await connect_whatsapp_client();
-    if (whatsapp_status.value == true) {
+    if (whatsapp_status.value === true) {
       set_is_whatsapp_connected(true);
-      localStorage.setItem("whatsappConnected", "true"); // Save the connection state
+      localStorage.setItem("whatsappConnected", "true");
     }
   };
 
@@ -88,7 +75,7 @@ export default function QR_modal() {
 
   return (
     <>
-      {toggleModal && (
+      {isModalVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
       )}
       <div
@@ -96,7 +83,7 @@ export default function QR_modal() {
         tabIndex="-1"
         aria-hidden="true"
         className={`${
-          toggleModal ? "" : "hidden"
+          isModalVisible ? "" : "hidden"
         } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
       >
         <div className="relative p-4 w-full max-w-2xl max-h-full">
@@ -108,7 +95,7 @@ export default function QR_modal() {
               <button
                 type="button"
                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                onClick={toggleModalHandler} // Correct event handler
+                onClick={onClose}
               >
                 <svg
                   className="w-3 h-3"
@@ -130,9 +117,9 @@ export default function QR_modal() {
             </div>
             <div className="p-4 md:p-5 space-y-4">
               <p>
-                Qr {qrCode && qrCode.length == 0 ? "generating" : "generated"}{" "}
+                Qr {qrCode && qrCode.length === 0 ? "generating" : "generated"}{" "}
               </p>
-              {qrCode && qrCode && qrCode.length ? (
+              {qrCode && qrCode.length ? (
                 <button
                   onClick={() => {
                     setShowQr(!showQr);
@@ -149,32 +136,23 @@ export default function QR_modal() {
                   <p>Time left: {formatTime(timer)}</p>
                 </>
               )}
-              {is_whatsapp_connected && (
-                <>
-                  <p>client connected</p>
-                </>
-              )}
+              {is_whatsapp_connected && <p>Client connected</p>}
               {groups_list && groups_list.length > 0 && (
-                <div>Groups fetched proced to select groups.</div>
+                <div>Groups fetched. Proceed to select groups.</div>
               )}
-            </div>
-            <div>
-              <span className="countdown">
-                <span style={{ "--value": 10 }}></span>
-              </span>
             </div>
             <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
               <button
                 type="button"
                 className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                onClick={toggleModalHandler} // Correct event handler
+                onClick={onClose}
               >
                 I accept
               </button>
               <button
                 type="button"
                 className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-                onClick={toggleModalHandler} // Correct event handler
+                onClick={onClose}
               >
                 Decline
               </button>

@@ -414,7 +414,8 @@ export default function page() {
         ) : (
           <></>
         )}
-        <TextEditor />
+        <div>test</div>
+        <TextEditor title={"Testing"} />
       </div>
     </div>
   );

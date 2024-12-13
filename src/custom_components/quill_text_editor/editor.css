@@ -1,0 +1,56 @@
+/* Editor container styling */
+.editor-container {
+  min-height: 300px;
+  padding: 16px;
+  border: 2px solid #e2e8f0; /* Light gray border */
+  border-radius: 8px;
+  background-color: #f9fafb; /* Subtle background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for better visuals */
+  font-family: "Roboto", sans-serif; /* Modern font */
+  overflow-y: auto;
+}
+
+/* Customize toolbar styles */
+.ce-toolbar {
+  background-color: #1a202c; /* Dark background for toolbar */
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ce-toolbar__content {
+  justify-content: center; /* Center align toolbar icons */
+}
+
+/* Customize heading styles */
+.ce-header {
+  font-family: "Merriweather", serif; /* Elegant font for headings */
+  margin: 8px 0;
+}
+
+.ce-header--1 {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.ce-header--2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.ce-header--3 {
+  font-size: 1.25em;
+  font-weight: normal;
+}
+
+.ce-header--4 {
+  font-size: 1em;
+  font-weight: normal;
+}
+
+/* Placeholder text */
+.ce-paragraph,
+.ce-block {
+  font-size: 16px;
+  color: #4a5568; /* Dark gray for placeholder text */
+}

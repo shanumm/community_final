@@ -9,6 +9,7 @@ export default function Whatsapp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { group_state, selected_groups, manage_selected_groups } =
     useContext(MyContext);
   const [dropdown, setdropdown] = useState(false);
@@ -38,6 +39,7 @@ export default function Whatsapp() {
   return (
     <div>
       <h1>WhatsApp Initialization</h1>
+      <button onClick={() => setIsModalVisible(true)}>Connect Whatsapp</button>
 
       {group_state && group_state.length > 0 && (
         <>
@@ -131,8 +133,10 @@ export default function Whatsapp() {
           </div>
         ))}
 
-      <QR_modal />
-
+      <QR_modal
+        isModalVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
       <div>
         <div>add number group</div>
         <div

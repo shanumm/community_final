@@ -15,33 +15,45 @@ import Checklist from "@editorjs/checklist";
 import Underline from "@editorjs/underline";
 import InlineCode from "@editorjs/inline-code";
 import Raw from "@editorjs/raw";
-import Attaches from "@editorjs/attaches";
-import Personality from "@editorjs/personality";
 import SimpleImage from "@editorjs/simple-image";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
+import "./editor.css";
 
 export default function TextEditor({ title }) {
+  const editorRef = useRef(null); // Ref for the Editor.js container
+  const editorInstance = useRef(null); // Ref for storing the Editor.js instance
+
   useEffect(() => {
-    const editor = new EditorJS({
-      holder: "editorjs",
+    if (!editorRef.current) return;
+
+    // Initialize Editor.js
+    editorInstance.current = new EditorJS({
+      holder: editorRef.current, // Use the ref as the holder
       tools: {
-        header: Header,
+        header: {
+          class: Header,
+          config: {
+            placeholder: "Enter a heading",
+            levels: [1, 2, 3, 4], // Allow multiple heading levels
+            defaultLevel: 2,
+          },
+        },
         list: List,
         paragraph: {
           class: Paragraph,
           inlineToolbar: true,
-        },
-        image: {
-          class: Image,
           config: {
-            endpoints: {
-              byFile: "http://localhost:8008/uploadFile", // Replace with your file upload endpoint
-              byUrl: "http://localhost:8008/fetchUrl", // Replace with your URL-fetch endpoint
-            },
+            placeholder: "Start writing your content...",
           },
         },
         table: Table,
-        quote: Quote,
+        quote: {
+          class: Quote,
+          config: {
+            quotePlaceholder: "Enter a quote",
+            captionPlaceholder: "Quote author",
+          },
+        },
         warning: Warning,
         marker: Marker,
         code: Code,
@@ -51,27 +63,31 @@ export default function TextEditor({ title }) {
         checklist: Checklist,
         underline: Underline,
         inlineCode: InlineCode,
-        raw: Raw,
-        attaches: {
-          class: Attaches,
-          config: {
-            endpoint: "http://localhost:8008/uploadFile", // Replace with your file upload endpoint
-          },
-        },
         simpleImage: SimpleImage,
       },
+      placeholder: "Compose your story...",
     });
 
     return () => {
-      editor.isReady
-        .then(() => {
-          editor.destroy();
-        })
-        .catch((e) => console.error("Error while destroying editor", e));
+      // Cleanup the Editor.js instance
+      if (editorInstance.current) {
+        editorInstance.current.isReady
+          .then(() => {
+            editorInstance.current.destroy();
+            editorInstance.current = null;
+          })
+          .catch((e) => console.error("Error while destroying editor", e));
+      }
     };
   }, []);
 
   return (
-    <div className="p-4 border border-gray-300 rounded-lg" id="editorjs"></div>
+    <div>
+      <h1 className="text-xl font-bold mb-4">{title}</h1>
+      <div
+        ref={editorRef} // Assign the ref to the container div
+        className="editor-container"
+      ></div>
+    </div>
   );
 }
