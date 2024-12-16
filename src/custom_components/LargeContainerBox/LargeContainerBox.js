@@ -2,12 +2,13 @@ import React from "react";
 
 export default function LargeContainerBox({ heading, subheading, size }) {
   return (
-    <div className="bg-white rounded-lg p-4 h-80 flex flex-col my-8">
+    <div className="bg-white rounded-lg p-4 min-h-80 flex flex-col my-8">
       <div>
         <div className="text-3xl font-medium text-[#313638]">{heading}</div>
         <div className="text-md text-[#313638]">{subheading}</div>
       </div>
-      <div className="bg-[#FFEBD3] rounded-lg flex-grow mt-4 mb-4"></div>
+      <div className="bg-[#FFEBD3] rounded-lg flex-grow my-4 p-4">
+      </div>
       <div className="flex justify-end items-center">
         <div className="mx-4 text-[#313638]">Members only</div>
         <button
